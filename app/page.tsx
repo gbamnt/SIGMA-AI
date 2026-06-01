@@ -1,12 +1,14 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
 import Planejamento from "./planejamento";
+import Preventivas from "./preventivas";
+import AssistenteIA from "./assistente-ia";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis } from "recharts";
 
 type Role="admin"|"gestor"|"tecnico";
 type Crit="critica"|"alta"|"media"|"baixa";
 type Status="aberta"|"planejada"|"execucao"|"concluida"|"cancelada";
-type Mod="dashboard"|"os"|"planejamento"|"gantt"|"hh"|"ativos"|"materiais"|"ia"|"relatorios"|"config";
+type Mod="dashboard"|"os"|"planejamento"|"preventivas"|"gantt"|"hh"|"ativos"|"materiais"|"ia"|"assistente"|"relatorios"|"config";
 interface User{id:string;nome:string;email:string;senha:string;role:Role;avatar:string;setor:string;}
 interface Notif{id:string;tipo:"alerta"|"info"|"sucesso"|"erro";titulo:string;msg:string;lida:boolean;tempo:string;}
 interface OS{id:string;descricao:string;ativo:string;criticidade:Crit;status:Status;dataPrevista:string;diasPraza:number;hhPlanejado:number;hhRealizado:number;equipDisponivel:number;responsavel:string;materialBloqueado:boolean;prioridade:number;risco:number;urgencia:number;impacto:number;obs:string;criadoEm:string;}
@@ -252,7 +254,7 @@ export default function App(){
   );
 
   // ── MAIN APP ──
-  const NAV=[{id:"dashboard",i:"⌂",l:"Dashboard"},{id:"os",i:"📋",l:"Ordens de Serviço"},{id:"planejamento",i:"🗓",l:"Planejamento"},{id:"gantt",i:"📅",l:"Gantt / Timeline"},{id:"hh",i:"⏱",l:"Apontamento HH"},{id:"ativos",i:"🏗",l:"Ativos"},{id:"materiais",i:"📦",l:"Materiais"},{id:"ia",i:"🧠",l:"IA Sigma"},{id:"relatorios",i:"📈",l:"Relatórios"},...(user.role==="admin"?[{id:"config",i:"⚙️",l:"Configurações"}]:[])];
+  const NAV=[{id:"dashboard",i:"⌂",l:"Dashboard"},{id:"os",i:"📋",l:"Ordens de Serviço"},{id:"planejamento",i:"🗓",l:"Planejamento"},{id:"preventivas",i:"🔧",l:"Preventivas"},{id:"gantt",i:"📅",l:"Gantt / Timeline"},{id:"hh",i:"⏱",l:"Apontamento HH"},{id:"ativos",i:"🏗",l:"Ativos"},{id:"materiais",i:"📦",l:"Materiais"},{id:"ia",i:"🧠",l:"IA Sigma"},{id:"relatorios",i:"📈",l:"Relatórios"},{id:"assistente",i:"🤖",l:"Assistente IA"},...(user.role==="admin"?[{id:"config",i:"⚙️",l:"Configurações"}]:[])];
 
   const conflitos:any[]=[];
   osList.forEach(o=>{
@@ -559,6 +561,12 @@ export default function App(){
           </div>
         </div>
       </div>
+    ),
+    preventivas:(
+      <Preventivas onToast={mkToast}/>
+    ),
+    assistente:(
+      <AssistenteIA onToast={mkToast}/>
     ),
     relatorios:(()=>{
       const hhOS=osD.map(o=>({id:o.id.replace("OS-",""),plan:o.hhPlanejado,real:o.hhRealizado}));
