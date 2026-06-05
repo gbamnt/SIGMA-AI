@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  role      String   @default("tecnico")
+  avatar    String?
+  setor     String?
+  telefone  String?
+  ativo     Boolean  @default(true)
+  authId    String?  @unique
+  criadoEm DateTime @default(now())
+
+  osResponsavel   OS[]            @relation("Responsavel")
+  apontamentos    ApontamentoHH[]
+  osPreventivas   OSPreventiva[]  @relation("RespPreventiva")
+}
+
+model Local {
+  id        String   @id @default(cuid())
+  nome      String
+  parentId  String?
+  tipo      String?
+  descricao String?
+  criadoEm  DateTime @default(now())
+
+  parent      Local?         @relation("LocalHier", fields: [parentId], references: [id])
+  filhos      Local[]        @relation("LocalHier")
+  os          OS[]
+  preventivas OSPreventiva[]
+}
+
+model Ativo {
+  id          String    @id @default(cuid())
+  nome        String
+  tipo        String
+  local       String
+  criticidade String    @default("media")
+  mtbf        Int       @default(720)
+  ultimaManut DateTime?
+  status      String    @default("ativo")
+  valor       Float     @default(0)
+  fabricante  String?
+  modelo      String?
+  numSerie    String?
+  criadoEm   DateTime   @default(now())
+  os          OS[]
+}
+
+model OS {
+  id                String   @id @default(cuid())
+  numero            String   @unique
+  descricao         String
+  criticidade       String   @default("media")
+  status            String   @default("aberta")
+  tipo              String   @default("corretiva")
+  dataPrevista      DateTime
+  diasPraza         Int      @default(0)
+  hhPlanejado       Int      @default(8)
+  hhRealizado       Int      @default(0)
+  equipDisponivel   Int      @default(80)
+  materialBloqueado Boolean  @default(false)
+  prioridade        Int      @default(5)
+  risco             Int      @default(5)
+  urgencia          Int      @default(5)
+  impacto           Int      @default(5)
+  obs               String?
+  criadoEm          DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  responsavelId String?
+  responsavel   Usuario? @relation("Responsavel", fields: [responsavelId], references: [id])
+  ativoId       String?
+  ativo         Ativo?   @relation(fields: [ativoId], references: [id])
+  localId       String?
+  local         Local?   @relation(fields: [localId], references: [id])
+
+  apontamentos ApontamentoHH[]
+  materiaisOS  OSMaterial[]
+  alocacoes    Alocacao[]
+}
+
+model OSPreventiva {
+  id           String   @id @default(cuid())
+  numero       String   @unique
+  titulo       String
+  tipo         String   @default("pmoc")
+  recorrencia  String   @default("mensal")
+  prioridade   String   @default("media")
+  ativo        Boolean  @default(true)
+  proxExecucao DateTime
+  hhEstimado   Int      @default(4)
+  obs          String?
+  acoes        Json     @default("[]")
+  materiais    Json     @default("[]")
+  criadoEm     DateTime @default(now())
+
+  responsavelId String?
+  responsavel   Usuario? @relation("RespPreventiva", fields: [responsavelId], references: [id])
+  localId       String?
+  local         Local?   @relation(fields: [localId], references: [id])
+}
+
+model Material {
+  id          String   @id @default(cuid())
+  codigo      String   @unique
+  nome        String
+  categoria   String
+  estoque     Int      @default(0)
+  minimo      Int      @default(1)
+  custo       Float    @default(0)
+  unidade     String   @default("un")
+  fornecedor  String?
+  localizacao String?
+  criadoEm   DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  osVinculadas OSMaterial[]
+}
+
+model OSMaterial {
+  id         String  @id @default(cuid())
+  osId       String
+  materialId String
+  quantidade Int     @default(1)
+  status     String  @default("pendente")
+  os         OS       @relation(fields: [osId], references: [id], onDelete: Cascade)
+  material   Material @relation(fields: [materialId], references: [id])
+}
+
+model ApontamentoHH {
+  id         String   @id @default(cuid())
+  osId       String
+  usuarioId  String
+  data       DateTime
+  hhPlan     Int      @default(8)
+  hhReal     Int      @default(0)
+  tarefas    String?
+  criadoEm  DateTime  @default(now())
+  os         OS      @relation(fields: [osId], references: [id], onDelete: Cascade)
+  usuario    Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+model Alocacao {
+  id           String   @id @default(cuid())
+  osId         String
+  funcionarios Json     @default("[]")
+  dia          Int
+  horaInicio   Int
+  duracao      Int
+  semana       String
+  cor          String   @default("#3b82f6")
+  criadoEm    DateTime  @default(now())
+  os           OS @relation(fields: [osId], references: [id], onDelete: Cascade)
+}
+
+model Config {
+  id    String @id @default(cuid())
+  chave String @unique
+  valor String
+}

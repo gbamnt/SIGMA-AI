@@ -3,12 +3,13 @@ import { useState, useMemo, useCallback } from "react";
 import Planejamento from "./planejamento";
 import Preventivas from "./preventivas";
 import AssistenteIA from "./assistente-ia";
+import Inteligencia from "./inteligencia";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis } from "recharts";
 
 type Role="admin"|"gestor"|"tecnico";
 type Crit="critica"|"alta"|"media"|"baixa";
 type Status="aberta"|"planejada"|"execucao"|"concluida"|"cancelada";
-type Mod="dashboard"|"os"|"planejamento"|"preventivas"|"gantt"|"hh"|"ativos"|"materiais"|"ia"|"assistente"|"relatorios"|"config";
+type Mod="dashboard"|"os"|"planejamento"|"preventivas"|"gantt"|"hh"|"ativos"|"materiais"|"inteligencia"|"relatorios"|"config";
 interface User{id:string;nome:string;email:string;senha:string;role:Role;avatar:string;setor:string;}
 interface Notif{id:string;tipo:"alerta"|"info"|"sucesso"|"erro";titulo:string;msg:string;lida:boolean;tempo:string;}
 interface OS{id:string;descricao:string;ativo:string;criticidade:Crit;status:Status;dataPrevista:string;diasPraza:number;hhPlanejado:number;hhRealizado:number;equipDisponivel:number;responsavel:string;materialBloqueado:boolean;prioridade:number;risco:number;urgencia:number;impacto:number;obs:string;criadoEm:string;}
@@ -512,61 +513,18 @@ export default function App(){
         </div>
       </div>
     ),
-    ia:(
-      <div style={{display:"flex",flexDirection:"column",gap:16}}>
-        <h2 style={{fontFamily:"Syne,sans-serif",fontWeight:700,fontSize:20}}>🧠 IA Sigma — Inteligência Operacional</h2>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:12}}>
-          {[{l:"MTTR",sub:"Tempo Médio Reparo",v:mttr,u:"dias",ok:mttr<5,c:"#3b82f6"},{l:"MTBF",sub:"Entre Falhas",v:mtbf,u:"dias",ok:mtbf>20,c:"#10b981"},{l:"Backlog",sub:"Trabalho Pendente",v:bkl,u:"dias",ok:bkl<15,c:"#f97316"},{l:"Score Médio",sub:"Das OS",v:(osD.reduce((s,o)=>s+o.score,0)/osD.length).toFixed(1),u:"/10",ok:true,c:"#8b5cf6"}].map((m,i)=>(
-            <div key={i} style={{...card(),padding:20}}><div style={{fontSize:10,color:S.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>{m.l}</div><div style={{fontSize:11,color:S.muted,marginBottom:10}}>{m.sub}</div><div style={{fontFamily:"Syne,sans-serif",fontSize:32,fontWeight:800,color:m.c}}>{m.v}<span style={{fontSize:13,fontWeight:400,marginLeft:3}}>{m.u}</span></div><div style={{fontSize:11,marginTop:8,color:m.ok?"#10b981":"#f97316"}}>{m.ok?"✅ Saudável":"⚠️ Atenção"}</div></div>
-          ))}
-        </div>
-        <div style={{...card(),padding:20}}>
-          <div style={{fontWeight:700,fontSize:14,marginBottom:16}}>📊 Score Sigma por OS</div>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={osD.sort((a,b)=>b.score-a.score).map(o=>({id:o.id.replace("OS-",""),score:o.score}))}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(99,179,237,0.08)"/><XAxis dataKey="id" stroke={S.muted} tick={{fill:S.muted,fontSize:10}}/><YAxis domain={[0,10]} stroke={S.muted} tick={{fill:S.muted,fontSize:11}}/>
-              <Tooltip content={<CT/>}/>
-              <Bar dataKey="score" name="Score" radius={[6,6,0,0]}>{osD.sort((a,b)=>b.score-a.score).map((o,i)=><Cell key={i} fill={sc(o.score)}/>)}</Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-          <div style={{...card({borderColor:"rgba(239,68,68,0.2)"}),padding:20}}>
-            <div style={{fontWeight:700,fontSize:13,marginBottom:14,color:"#fca5a5"}}>🚨 Conflitos Detectados ({conflitos.length})</div>
-            {conflitos.length===0?<div style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:8,padding:12,fontSize:12,color:"#10b981"}}>✅ Nenhum conflito!</div>:
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {conflitos.map((c,i)=>(
-                <div key={i} style={{padding:10,borderRadius:8,background:c.sev==="critica"?"rgba(239,68,68,0.07)":"rgba(249,115,22,0.07)",borderLeft:`3px solid ${c.sev==="critica"?"#ef4444":"#f97316"}`}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:11,fontWeight:700,color:c.sev==="critica"?"#ef4444":"#f97316"}}>{c.tp}</span><span style={{fontSize:9,padding:"1px 6px",borderRadius:4,fontWeight:700,background:c.sev==="critica"?"rgba(239,68,68,0.15)":"rgba(249,115,22,0.15)",color:c.sev==="critica"?"#ef4444":"#f97316"}}>{c.sev.toUpperCase()}</span></div>
-                  <p style={{fontSize:11,color:S.muted,marginBottom:2}}>{c.msg}</p><p style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>💡 {c.rec}</p>
-                </div>
-              ))}
-            </div>}
-          </div>
-          <div style={{...card({borderColor:"rgba(234,179,8,0.2)"}),padding:20}}>
-            <div style={{fontWeight:700,fontSize:13,marginBottom:14,color:"#fde68a"}}>💡 Recomendações IA</div>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {[{t:"🔴 Prioridade Máxima",d:osD[0]?.id+": "+osD[0]?.descricao?.substring(0,35),a:"Executar imediatamente.",imp:"alta"},
-                {t:"⚠️ Conflitos",d:`${conflitos.filter(c=>c.sev==="critica").length} crítico(s)`,a:"Revisar conflitos.",imp:"alta"},
-                {t:"🔧 Materiais",d:`${kpis.bl} OS bloqueadas`,a:"Acionar fornecedores.",imp:"alta"},
-                {t:"📈 Preventiva",d:"60% corretiva vs 40% prev.",a:"Meta: 70% preventiva.",imp:"media"},
-                {t:"👥 Capacidade",d:`Backlog: ${bkl}d equiv.`,a:"Avaliar reforço de equipe.",imp:"media"},
-              ].map((r,i)=>(
-                <div key={i} style={{padding:10,borderRadius:8,background:r.imp==="alta"?"rgba(239,68,68,0.06)":"rgba(234,179,8,0.06)",borderLeft:`3px solid ${r.imp==="alta"?"#ef4444":"#eab308"}`}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:11,fontWeight:700}}>{r.t}</span><span style={{fontSize:9,padding:"1px 6px",borderRadius:4,fontWeight:700,background:r.imp==="alta"?"rgba(239,68,68,0.15)":"rgba(234,179,8,0.15)",color:r.imp==="alta"?"#ef4444":"#eab308"}}>{r.imp.toUpperCase()}</span></div>
-                  <p style={{fontSize:11,color:S.muted,marginBottom:2}}>{r.d}</p><p style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>✓ {r.a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-    preventivas:(
+preventivas:(
       <Preventivas onToast={mkToast}/>
     ),
-    assistente:(
-      <AssistenteIA onToast={mkToast}/>
+    inteligencia:(
+      <Inteligencia
+        osData={osD}
+        mttr={mttr}
+        mtbf={mtbf}
+        backlog={bkl}
+        kpis={kpis}
+        onToast={mkToast}
+      />
     ),
     relatorios:(()=>{
       const hhOS=osD.map(o=>({id:o.id.replace("OS-",""),plan:o.hhPlanejado,real:o.hhRealizado}));
