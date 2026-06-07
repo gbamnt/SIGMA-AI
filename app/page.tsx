@@ -513,7 +513,7 @@ export default function App(){
         </div>
       </div>
     ),
-preventivas:(
+    preventivas:(
       <Preventivas onToast={mkToast}/>
     ),
     inteligencia:(
