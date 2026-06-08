@@ -270,7 +270,7 @@ export default function App(){
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div><h1 style={{fontFamily:"Syne,sans-serif",fontSize:22,fontWeight:800,marginBottom:4}}>Olá, {user.nome.split(" ")[0]}! 👋</h1><p style={{fontSize:13,color:S.muted}}>{new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})} · {rL[user.role]}</p></div>
-          {kpis.at>0&&<div style={{padding:"10px 20px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:12,display:"flex",gap:8,cursor:"pointer"}} onClick={()=>setMod("os")}><span>🚨</span><span style={{fontSize:13,color:"#fca5a5",fontWeight:600}}>{kpis.at} OS atrasada{kpis.at>1?"s":""}</span></div>}
+          {kpis.at>0&&<div style={{padding:"10px 20px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:12,display:"flex",gap:8,cursor:"pointer",alignItems:"center"}} onClick={()=>setMod("os")}><span>🚨</span><span style={{fontSize:13,color:"#fca5a5",fontWeight:600}}>{kpis.at} OS atrasada{kpis.at>1?"s":""} — clique para ver</span></div>}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10}}>
           {[{l:"OS Abertas",v:kpis.ab,c:"#00d4ff",i:"📋"},{l:"HH Planejado",v:kpis.hh+"h",c:"#8b5cf6",i:"⏱"},{l:"Atrasos",v:kpis.at,c:"#ef4444",i:"⚠️"},{l:"Aderência",v:kpis.adr+"%",c:"#10b981",i:"📈"},{l:"Críticas",v:kpis.cr,c:"#f97316",i:"🔴"},{l:"Em Execução",v:kpis.ex,c:"#06b6d4",i:"⚡"},{l:"Bloqueadas",v:kpis.bl,c:"#eab308",i:"🔒"},{l:"Concluídas",v:kpis.co,c:"#22c55e",i:"✅"}].map((k,i)=>(
@@ -715,7 +715,7 @@ export default function App(){
             <button key={n.id} onClick={()=>setMod(n.id as Mod)} title={n.l} style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"9px 10px",borderRadius:7,border:"none",cursor:"pointer",marginBottom:1,background:mod===n.id?"rgba(0,212,255,0.12)":"transparent",color:mod===n.id?"#00d4ff":S.muted,outline:mod===n.id?"1px solid rgba(0,212,255,0.2)":"none",fontSize:12,fontWeight:mod===n.id?600:400,transition:"all 0.15s",fontFamily:"DM Sans,sans-serif",textAlign:"left"}}>
               <span style={{fontSize:15,flexShrink:0,width:20,textAlign:"center"}}>{n.i}</span>
               {side&&<span style={{whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{n.l}</span>}
-              {side&&n.id==="ia"&&<span style={{marginLeft:"auto",background:"rgba(0,212,255,0.15)",color:"#00d4ff",fontSize:9,padding:"1px 5px",borderRadius:4,fontWeight:700}}>AI</span>}
+              {side&&n.id==="inteligencia"&&<span style={{marginLeft:"auto",background:"rgba(139,92,246,0.2)",color:"#a78bfa",fontSize:9,padding:"1px 5px",borderRadius:4,fontWeight:700}}>AI</span>}
             </button>
           ))}
         </nav>
