@@ -255,7 +255,7 @@ export default function App(){
   );
 
   // ── MAIN APP ──
-  const NAV=[{id:"dashboard",i:"⌂",l:"Dashboard"},{id:"os",i:"📋",l:"Ordens de Serviço"},{id:"planejamento",i:"🗓",l:"Planejamento"},{id:"preventivas",i:"🔧",l:"Preventivas"},{id:"gantt",i:"📅",l:"Gantt / Timeline"},{id:"hh",i:"⏱",l:"Apontamento HH"},{id:"ativos",i:"🏗",l:"Ativos"},{id:"materiais",i:"📦",l:"Materiais"},{id:"ia",i:"🧠",l:"IA Sigma"},{id:"relatorios",i:"📈",l:"Relatórios"},{id:"assistente",i:"🤖",l:"Assistente IA"},...(user.role==="admin"?[{id:"config",i:"⚙️",l:"Configurações"}]:[])];
+  const NAV=[{id:"dashboard",i:"⌂",l:"Dashboard"},{id:"os",i:"📋",l:"Ordens de Serviço"},{id:"planejamento",i:"🗓",l:"Planejamento"},{id:"preventivas",i:"🔧",l:"Preventivas"},{id:"gantt",i:"📅",l:"Gantt / Timeline"},{id:"hh",i:"⏱",l:"Apontamento HH"},{id:"ativos",i:"🏗",l:"Ativos"},{id:"materiais",i:"📦",l:"Materiais"},{id:"inteligencia",i:"🧠",l:"Inteligência IA"},{id:"relatorios",i:"📈",l:"Relatórios"},...(user.role==="admin"?[{id:"config",i:"⚙️",l:"Configurações"}]:[])];
 
   const conflitos:any[]=[];
   osList.forEach(o=>{
