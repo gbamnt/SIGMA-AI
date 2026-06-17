@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIGMA AI — O Waze da Manutenção Predial</title>
+  <meta name="description" content="Sistema inteligente de gestão de manutenção predial com Score Sigma™, IA integrada e dashboards em tempo real." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060A12;
+      --surf: #0D1420;
+      --surf2: #111927;
+      --cyan: #00D4FF;
+      --violet: #8B5CF6;
+      --green: #10B981;
+      --orange: #F97316;
+      --red: #EF4444;
+      --text: #E2E8F0;
+      --muted: #64748B;
+      --border: rgba(99,179,237,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BG ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px, 5vw, 80px);
+      height: 64px;
+      background: rgba(6,10,18,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan), #3B82F6, var(--violet));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 20px;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(0,212,255,0.35);
+      flex-shrink: 0;
+    }
+
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; }
+
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: var(--cyan); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--cyan), #3B82F6);
+      color: #fff; border: none; border-radius: 8px;
+      padding: 9px 22px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 0 20px rgba(0,212,255,0.25);
+      transition: opacity .2s, transform .15s;
+      white-space: nowrap;
+    }
+    .nav-cta:hover { opacity: .9; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px clamp(20px, 6vw, 120px) 80px;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 10%; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(0,212,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--cyan);
+      margin-bottom: 28px;
+      letter-spacing: 0.04em;
+    }
+
+    .hero-badge::before { content: '●'; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(42px, 8vw, 88px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .h1-line2 {
+      color: var(--cyan);
+      text-shadow: 0 0 60px rgba(0,212,255,0.4);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 22px);
+      color: var(--muted);
+      max-width: 600px;
+      margin: 20px auto 40px;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), #3B82F6, var(--violet));
+      color: #fff; border: none; border-radius: 10px;
+      padding: 14px 32px; font-size: 15px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 0 30px rgba(0,212,255,0.25);
+      transition: transform .15s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,212,255,0.4); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 32px;
+      font-size: 15px; font-weight: 500;
+      cursor: pointer; text-decoration: none;
+      transition: border-color .2s, background .2s;
+    }
+    .btn-secondary:hover { border-color: rgba(99,179,237,0.4); background: rgba(255,255,255,0.03); }
+
+    /* ── SCORE RING HERO ── */
+    .score-demo {
+      display: flex; align-items: center; justify-content: center; gap: 32px;
+      flex-wrap: wrap;
+      padding: 28px 32px;
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 720px; width: 100%;
+      margin: 0 auto;
+    }
+
+    .score-ring-wrap { text-align: center; }
+
+    .score-ring-wrap svg { filter: drop-shadow(0 0 12px rgba(239,68,68,0.5)); }
+
+    .score-info { text-align: left; }
+    .score-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+    .score-os-id { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--cyan); margin-bottom: 6px; }
+    .score-desc { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+    .score-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      font-size: 10px; font-weight: 700; padding: 3px 9px;
+      border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .tag-critica { background: rgba(239,68,68,0.15); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+    .tag-atrasada { background: rgba(249,115,22,0.12); color: #F97316; border: 1px solid rgba(249,115,22,0.3); }
+    .tag-bloqueada { background: rgba(234,179,8,0.12); color: #EAB308; border: 1px solid rgba(234,179,8,0.3); }
+
+    .score-bars {
+      display: flex; flex-direction: column; gap: 6px;
+      min-width: 200px;
+    }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: 11px; color: var(--muted); width: 72px; flex-shrink: 0; }
+    .bar-track {
+      flex: 1; height: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px; overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--cyan), #3B82F6);
+      transition: width 1.5s cubic-bezier(.25,.46,.45,.94);
+    }
+    .bar-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--cyan); width: 20px; text-align: right; }
+
+    /* ── SECTION ── */
+    section {
+      position: relative; z-index: 1;
+      padding: clamp(60px, 8vw, 120px) clamp(20px, 6vw, 120px);
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--cyan);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+    }
+
+    /* ── KPI ROW ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .kpi-card {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color .2s;
+    }
+    .kpi-card:hover { border-color: rgba(0,212,255,0.3); }
+
+    .kpi-icon { font-size: 22px; margin-bottom: 12px; }
+    .kpi-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px; font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .kpi-desc { font-size: 12px; color: var(--muted); }
+
+    /* ── MODULES GRID ── */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .module-card {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      transition: border-color .2s, transform .2s;
+    }
+    .module-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-3px); }
+
+    .module-icon { font-size: 28px; margin-bottom: 14px; }
+    .module-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .module-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── SCORE SECTION ── */
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .score-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+
+    .score-formula {
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+
+    .code-comment { color: var(--muted); }
+    .code-key { color: var(--cyan); }
+    .code-val { color: #10B981; }
+    .code-op { color: #F97316; }
+
+    .score-legend { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+    .legend-row { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── TECH STACK ── */
+    .tech-row {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+
+    .tech-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px; font-weight: 500;
+      transition: border-color .2s;
+    }
+    .tech-chip:hover { border-color: rgba(0,212,255,0.3); }
+    .tech-chip span { font-size: 18px; }
+
+    /* ── CTA FINAL ── */
+    .cta-section {
+      text-align: center;
+      padding: clamp(80px, 10vw, 140px) clamp(20px, 6vw, 80px);
+      background: radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 28px clamp(20px, 6vw, 80px);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+
+    footer p { font-size: 13px; color: var(--muted); }
+    footer a { color: var(--cyan); text-decoration: none; font-size: 13px; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">Σ</div>
+    <div>
+      <div class="logo-text">SIGMA AI</div>
+      <div class="logo-sub">SISTEMA DE MANUTENÇÃO</div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#modulos">Módulos</a>
+    <a href="#score">Score Sigma™</a>
+    <a href="#stack">Stack</a>
+    <a href="#docs">Docs</a>
+  </div>
+  <a href="https://sigma-ai.vercel.app" class="nav-cta" target="_blank">Acessar Demo →</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-badge">Sistema em produção · v6.0.0</div>
+
+  <h1>
+    O Waze da<br/>
+    <span class="h1-line2">Manutenção Predial</span>
+  </h1>
+
+  <p class="hero-sub">
+    Gerencie ordens de serviço com inteligência artificial, priorização automática pelo Score Sigma™ e dashboards operacionais em tempo real.
+  </p>
+
+  <div class="hero-actions">
+    <a href="https://sigma-ai.vercel.app" class="btn-primary" target="_blank">▶ Acessar Demo</a>
+    <a href="https://github.com/gbamnt/sigma-ai" class="btn-secondary" target="_blank">GitHub →</a>
+  </div>
+
+  <!-- Score Sigma™ demo card -->
+  <div class="score-demo reveal">
+    <div class="score-ring-wrap">
+      <svg id="heroRing" width="90" height="90" viewBox="0 0 90 90">
+        <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="7"/>
+        <circle id="ringArc" cx="45" cy="45" r="38" fill="none" stroke="#EF4444" stroke-width="7"
+          stroke-dasharray="0 238.76" stroke-linecap="round"
+          transform="rotate(-90 45 45)"
+          style="filter:drop-shadow(0 0 8px #EF4444); transition: stroke-dasharray 2s cubic-bezier(.25,.46,.45,.94)"/>
+        <text id="ringVal" x="45" y="45" text-anchor="middle" dy=".35em"
+          fill="#EF4444" style="font-family:'DM Mono',monospace;font-weight:700;font-size:18px;">0.0</text>
+      </svg>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;">SCORE SIGMA™</div>
+    </div>
+
+    <div class="score-info">
+      <div class="score-label">OS Identificada</div>
+      <div class="score-os-id">OS-1039</div>
+      <div class="score-desc">Vazamento Emergencial — Subsolo</div>
+      <div class="score-tags">
+        <span class="tag tag-critica">Crítica</span>
+        <span class="tag tag-atrasada">−3 dias</span>
+        <span class="tag tag-bloqueada">🔒 Material</span>
+      </div>
+    </div>
+
+    <div class="score-bars">
+      <div class="bar-row">
+        <div class="bar-label">Prioridade</div>
+        <div class="bar-track"><div class="bar-fill" id="b1" style="width:0%"></div></div>
+        <div class="bar-val">10</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Risco</div>
+        <div class="bar-track"><div class="bar-fill" id="b2" style="width:0%"></div></div>
+        <div class="bar-val">10</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Urgência</div>
+        <div class="bar-track"><div class="bar-fill" id="b3" style="width:0%"></div></div>
+        <div class="bar-val">10</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Impacto</div>
+        <div class="bar-track"><div class="bar-fill" id="b4" style="width:0%"></div></div>
+        <div class="bar-val">9</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── KPIs ── -->
+<section id="modulos">
+  <div class="section-label">Controle Operacional</div>
+  <h2>Tudo que sua equipe<br/>de manutenção precisa</h2>
+  <p class="section-sub">Do dashboard em tempo real ao assistente IA — 11 módulos integrados num sistema único.</p>
+
+  <div class="kpi-row reveal">
+    <div class="kpi-card">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-val" style="color:var(--cyan)">10</div>
+      <div class="kpi-desc">OS gerenciadas em demo</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🏗</div>
+      <div class="kpi-val" style="color:var(--violet)">6</div>
+      <div class="kpi-desc">Ativos monitorados</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">⏱</div>
+      <div class="kpi-val" style="color:#F97316">136h</div>
+      <div class="kpi-desc">HH planejado total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-val" style="color:var(--green)">80%</div>
+      <div class="kpi-desc">Aderência ao prazo</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🧠</div>
+      <div class="kpi-val" style="color:var(--cyan)">IA</div>
+      <div class="kpi-desc">Claude Haiku integrado</div>
+    </div>
+  </div>
+
+  <div class="modules-grid reveal">
+    <div class="module-card">
+      <div class="module-icon">⌂</div>
+      <div class="module-name">Dashboard</div>
+      <div class="module-desc">KPIs em tempo real, Curva S, alertas automáticos e top prioridades calculadas pelo Score Sigma™.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">📋</div>
+      <div class="module-name">Ordens de Serviço</div>
+      <div class="module-desc">Tabela completa com filtros por status e criticidade, busca global e ordenação por score, prazo ou HH.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🗓</div>
+      <div class="module-name">Planejamento</div>
+      <div class="module-desc">Drag-and-drop de OS por status com detecção automática de conflitos de equipe e material.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">📅</div>
+      <div class="module-name">Gantt / Timeline</div>
+      <div class="module-desc">Visualização temporal de todas as OS com barra de progresso HH e indicador de prazo por cor.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🔧</div>
+      <div class="module-name">OS Preventivas</div>
+      <div class="module-desc">Plano de manutenção preventiva com recorrência configurável, checklist de ações e próximas execuções.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">⏱</div>
+      <div class="module-name">Apontamento HH</div>
+      <div class="module-desc">Registro de horas-homem por funcionário com análise de eficiência planejado vs realizado.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🏗</div>
+      <div class="module-name">Ativos</div>
+      <div class="module-desc">Monitoramento de infraestrutura com cálculo de risco baseado em MTBF e última manutenção.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">📦</div>
+      <div class="module-name">Materiais</div>
+      <div class="module-desc">Controle de estoque com alertas de mínimo, pendências por fornecedor e vinculação a OS.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🧠</div>
+      <div class="module-name">Inteligência IA</div>
+      <div class="module-desc">Assistente conversacional Claude Haiku com contexto das OS, KPIs e análise preditiva.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">📈</div>
+      <div class="module-name">Relatórios</div>
+      <div class="module-desc">Resumo executivo, gráficos de HH e criticidade, e exportação completa em CSV com um clique.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── SCORE SIGMA ── -->
+<section id="score" style="background: var(--surf);">
+  <div class="section-label">Algoritmo Proprietário</div>
+  <h2>Score Sigma™</h2>
+  <p class="section-sub">Uma pontuação de 0 a 10 calculada automaticamente para cada OS. Chega de decidir na intuição.</p>
+
+  <div class="score-grid reveal">
+    <div>
+      <div class="score-formula">
+        <div class="code-comment">// Score Sigma™ — cálculo de prioridade</div>
+        <div style="margin-top:14px;">
+          <span class="code-key">score</span> <span class="code-op">=</span> max(0, min(10,<br/>
+          &nbsp;&nbsp;<span class="code-key">prioridade</span> <span class="code-op">×</span> <span class="code-val">0.20</span> <span class="code-op">+</span><br/>
+          &nbsp;&nbsp;<span class="code-key">risco</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="code-op">×</span> <span class="code-val">0.25</span> <span class="code-op">+</span><br/>
+          &nbsp;&nbsp;<span class="code-key">urgencia</span>&nbsp; <span class="code-op">×</span> <span class="code-val">0.20</span> <span class="code-op">+</span><br/>
+          &nbsp;&nbsp;<span class="code-key">impacto</span>&nbsp;&nbsp; <span class="code-op">×</span> <span class="code-val">0.15</span> <span class="code-op">+</span><br/>
+          &nbsp;&nbsp;<span class="code-key">HH</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="code-op">×</span> <span class="code-val">0.10</span> <span class="code-op">+</span><br/>
+          &nbsp;&nbsp;<span class="code-key">disponib</span>&nbsp; <span class="code-op">×</span> <span class="code-val">0.10</span><br/>
+          &nbsp;&nbsp;<span class="code-op">−</span> bloqueio  <span class="code-op">×</span> <span class="code-val">0.30</span><br/>
+          &nbsp;&nbsp;<span class="code-op">+</span> atraso   <span class="code-op">×</span> <span class="code-val">0.15</span><br/>
+          ))
+        </div>
+      </div>
+
+      <div class="score-legend">
+        <div class="legend-row">
+          <div class="legend-dot" style="background:#EF4444;box-shadow:0 0 8px #EF4444;"></div>
+          <div><strong>8.0 – 10.0</strong> <span style="color:var(--muted)">— CRÍTICO: executar imediatamente</span></div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-dot" style="background:#F97316;box-shadow:0 0 8px #F97316;"></div>
+          <div><strong>6.0 – 7.9</strong> <span style="color:var(--muted)">— ALTO: planejar com urgência</span></div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-dot" style="background:#EAB308;box-shadow:0 0 8px #EAB308;"></div>
+          <div><strong>4.0 – 5.9</strong> <span style="color:var(--muted)">— MÉDIO: monitorar</span></div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-dot" style="background:#10B981;box-shadow:0 0 8px #10B981;"></div>
+          <div><strong>0.0 – 3.9</strong> <span style="color:var(--muted)">— BAIXO: dentro dos padrões</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.7;">
+        O Score Sigma™ combina <strong style="color:var(--text)">6 variáveis operacionais</strong> com pesos diferenciados. Risco tem o maior peso porque determina consequência real. Bloqueios de material penalizam fortemente — uma OS travada com score 9 vira problema de suprimentos, não de equipe.
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Maior peso</div>
+          <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--cyan);font-weight:700;">Risco</div>
+          <div style="font-size:12px;color:var(--muted);">25% do score</div>
+        </div>
+        <div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Penalidade max</div>
+          <div style="font-family:'DM Mono',monospace;font-size:20px;color:#EAB308;font-weight:700;">−30%</div>
+          <div style="font-size:12px;color:var(--muted);">Material bloqueado</div>
+        </div>
+        <div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Variáveis</div>
+          <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--violet);font-weight:700;">6</div>
+          <div style="font-size:12px;color:var(--muted);">Inputs simultâneos</div>
+        </div>
+        <div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Resultado</div>
+          <div style="font-family:'DM Mono',monospace;font-size:20px;color:var(--green);font-weight:700;">0–10</div>
+          <div style="font-size:12px;color:var(--muted);">Prioridade unificada</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── STACK ── -->
+<section id="stack">
+  <div class="section-label">Tecnologia</div>
+  <h2>Stack moderno,<br/>deploy em segundos</h2>
+  <p class="section-sub">Construído com as mesmas ferramentas das melhores startups de produto.</p>
+
+  <div class="tech-row reveal">
+    <div class="tech-chip"><span>⚡</span> Next.js 14</div>
+    <div class="tech-chip"><span>🔷</span> TypeScript</div>
+    <div class="tech-chip"><span>🐘</span> PostgreSQL</div>
+    <div class="tech-chip"><span>🔺</span> Prisma ORM</div>
+    <div class="tech-chip"><span>⚡</span> Supabase</div>
+    <div class="tech-chip"><span>🤖</span> Claude Haiku</div>
+    <div class="tech-chip"><span>📊</span> Recharts</div>
+    <div class="tech-chip"><span>🎨</span> Tailwind CSS</div>
+    <div class="tech-chip"><span>▲</span> Vercel Edge</div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── DOCS ── -->
+<section id="docs">
+  <div class="section-label">Documentação</div>
+  <h2>Pronto para integrar</h2>
+  <p class="section-sub">API REST completa com Next.js App Router. Schema Prisma com 10 modelos relacionais.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;" class="reveal">
+    <div style="background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:24px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cyan);margin-bottom:12px;">ENDPOINTS</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;">
+          <span style="background:rgba(16,185,129,0.15);color:#10B981;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0;">GET</span>
+          <span style="color:var(--muted);">/api/os</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;">
+          <span style="background:rgba(59,130,246,0.15);color:#3B82F6;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0;">POST</span>
+          <span style="color:var(--muted);">/api/os</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;">
+          <span style="background:rgba(249,115,22,0.15);color:#F97316;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0;">PUT</span>
+          <span style="color:var(--muted);">/api/os/:id</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;">
+          <span style="background:rgba(239,68,68,0.15);color:#EF4444;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0;">DEL</span>
+          <span style="color:var(--muted);">/api/os/:id</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;">
+          <span style="background:rgba(59,130,246,0.15);color:#3B82F6;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0;">POST</span>
+          <span style="color:var(--muted);">/api/ia/chat</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:24px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cyan);margin-bottom:12px;">SETUP (4 COMANDOS)</div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;line-height:2;color:var(--muted);">
+        <span style="color:#10B981;">$</span> git clone github.com/gbamnt/sigma-ai<br/>
+        <span style="color:#10B981;">$</span> npm install<br/>
+        <span style="color:#10B981;">$</span> npx prisma db push<br/>
+        <span style="color:#10B981;">$</span> npm run dev
+      </div>
+    </div>
+
+    <div style="background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:24px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cyan);margin-bottom:12px;">CREDENCIAIS DEMO</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:10px;">
+          <div style="font-size:10px;color:var(--cyan);font-weight:700;margin-bottom:3px;">ADMIN</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">admin@sigma.ai / admin123</div>
+        </div>
+        <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;padding:10px;">
+          <div style="font-size:10px;color:#10B981;font-weight:700;margin-bottom:3px;">GESTOR</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">gestor@sigma.ai / gestor123</div>
+        </div>
+        <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.15);border-radius:8px;padding:10px;">
+          <div style="font-size:10px;color:#F97316;font-weight:700;margin-bottom:3px;">TÉCNICO</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">tecnico@sigma.ai / tecnico123</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA FINAL ── -->
+<section class="cta-section">
+  <div class="section-label">Pronto para começar?</div>
+  <h2>Sua manutenção,<br/>inteligente.</h2>
+  <p class="section-sub" style="margin:20px auto 40px;">Demo completo disponível. Todos os módulos funcionando, dados realistas, IA integrada.</p>
+  <div class="hero-actions">
+    <a href="https://sigma-ai.vercel.app" class="btn-primary" target="_blank">▶ Acessar Demo</a>
+    <a href="https://github.com/gbamnt/sigma-ai" class="btn-secondary" target="_blank">Ver no GitHub</a>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="logo-icon" style="width:32px;height:32px;font-size:15px;border-radius:8px;">Σ</div>
+    <p>© 2025 SIGMA AI — Gabriel Lucas · CEFET-RJ</p>
+  </div>
+  <div style="display:flex;gap:20px;align-items:center;">
+    <a href="https://github.com/gbamnt/sigma-ai" target="_blank">GitHub</a>
+    <a href="https://sigma-ai.vercel.app" target="_blank">Demo</a>
+  </div>
+</footer>
+
+<script>
+  // ── Score Ring Animation ──
+  function animateRing() {
+    const arc = document.getElementById('ringArc');
+    const val = document.getElementById('ringVal');
+    const bars = ['b1','b2','b3','b4'];
+    const barWidths = [100, 100, 100, 90];
+    if (!arc) return;
+
+    const circumference = 2 * Math.PI * 38; // 238.76
+    const targetScore = 9.3;
+    const targetDash = (targetScore / 10) * circumference;
+
+    let current = 0;
+    const duration = 2000;
+    const start = performance.now();
+
+    function step(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      current = targetScore * eased;
+
+      arc.setAttribute('stroke-dasharray', `${(current/10)*circumference} ${circumference}`);
+      val.textContent = current.toFixed(1);
+
+      bars.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el) el.style.width = `${barWidths[i] * eased}%`;
+      });
+
+      if (progress < 1) requestAnimationFrame(step);
+    }
+
+    // Delay start until ring is in view
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        requestAnimationFrame(step);
+        observer.disconnect();
+      }
+    }, { threshold: 0.5 });
+
+    const wrap = document.querySelector('.score-demo');
+    if (wrap) observer.observe(wrap);
+  }
+
+  // ── Scroll Reveal ──
+  function setupReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(el => observer.observe(el));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    animateRing();
+    setupReveal();
+  });
+</script>
+</body>
+</html>
